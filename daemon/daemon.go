@@ -29,7 +29,7 @@ func IndexHandler(r *restful.Request, w *restful.Response) {
         w.Write(writeError(err))
         return
     }
-    stdin, stdout, err := execContainer(id)
+    stdin, stdout, err := execContainer(id, request.Args)
     if err != nil {
         w.Write(writeError(err))
         return
@@ -62,8 +62,8 @@ func findPauseContainer(request *client.DebugExecRequest) (string, error) {
     return string(out)[:len(string(out))-1], nil
 }
 
-func execContainer(containerId string) (io.Reader, io.Writer, error) {
-    cmd := exec.Command("docker", "run", "-it", "--net=container:" + containerId, "--ipc=container:" + containerId, "--pid=container:" + containerId, NETWORKDEBUGIMAGE, "bash")
+func execContainer(containerId string, args []string) (io.Reader, io.Writer, error) {
+    cmd := exec.Command("docker", "run", "-it", "--net=container:" + containerId, "--ipc=container:" + containerId, "--pid=container:" + containerId, NETWORKDEBUGIMAGE, args...)
     cmd.Stdin = os.Stdin
     cmd.Stdout = os.Stdout
     err := cmd.Start()
